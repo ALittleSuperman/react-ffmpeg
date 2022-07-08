@@ -1,7 +1,7 @@
 .wrapper {
-    width: 100vw;
+    min-width: 100vw;
     height: 100vh;
-    overflow: hidden;
+    overflow: auto;
 }
 .viewContainer {
     width: 60%;

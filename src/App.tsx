@@ -3,9 +3,9 @@ import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg";
 import './app.css'
 function App() {
     const ffmpeg = createFFmpeg({ log: true });
-    const [video, setVideo] = useState()
-    const [subtitle, setSubtitle] = useState()
-    const [voice, setVoice] = useState()
+    const [video, setVideo] = useState<File>()
+    const [subtitle, setSubtitle] = useState<File>()
+    const [voice, setVoice] = useState<File>()
     const changeVideo = async () => {
         // @ts-ignore
         const videoTarget: any = document.querySelector('#video')
@@ -30,11 +30,18 @@ function App() {
         await ffmpeg.load()
         const dataVideo = await fetchFile(video as unknown as File)
         const dataVoice = await fetchFile(voice as unknown as File)
-        await ffmpeg.FS('writeFile', 'test.mp4', dataVideo);
-        await ffmpeg.FS('writeFile', 'test.wav', dataVoice);
-        await ffmpeg.run('-i', 'test.mp4', '-i', 'test.mp3', '-c:v', 'copy', '-c:a', 'aac', '-strict', 'experimental', '-map', '0:v:0', '-map', '1:a:0', 'output.mp4');
-        const data = ffmpeg.FS('readFile', 'output.mp4');
-        const videoTarget: any = document.querySelector('#video')
+        const subtitleVoice = await fetchFile(subtitle as unknown as File)
+        // @ts-ignore
+        ffmpeg.FS('writeFile', video.name, dataVideo);
+        // @ts-ignore
+        ffmpeg.FS('writeFile', voice.name, dataVoice);
+        // @ts-ignore
+        ffmpeg.FS('writeFile', subtitle.name, subtitleVoice);
+        // @ts-ignore
+        await ffmpeg.run('-i', video.name, '-i', voice.name,'-vf', `subtitles=${subtitle.name}`, '-c:a', 'aac', '-strict', 'experimental', '-map', '0:v:0', '-map', '1:a:0', 'output.mp4');
+        const data =  ffmpeg.FS('readFile', 'output.mp4');
+        console.log('success')
+        const videoTarget: any = document.querySelector('#v')
         videoTarget.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
     }
   return (
